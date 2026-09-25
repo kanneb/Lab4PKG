@@ -2,17 +2,20 @@
 #'
 #' A ggplot2 theme that can be used in ggplot2 plots
 #'
-#'
+#' @return A \code{theme} object that can be added in a ggplot2 object with \{+}
 #'
 #' @import ggplot2
 #'
 #' @examples
+#' library(ggplot2)
 #' data(iris)
 #'
 #' ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
 #' geom_point(size = 2) +
 #' theme_liu() +
 #' labs(title = "Iris-mätningar", subtitle = "Exempel med LiU-tema")
+#'
+#' @export
 
 theme_liu <- function(...) {
   theme(

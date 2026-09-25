@@ -32,3 +32,4 @@ linear_reg <- function(formula, data){
 
 
 
+
