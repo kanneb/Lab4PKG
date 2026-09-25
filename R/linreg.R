@@ -1,10 +1,23 @@
+linreg_class <- setRefClass("linreg",
+                            fields = list(X = "matrix", y = "numeric",
+                                          e_hat = "matrix")
+                            )
 
-linear_reg <- function(formula, data){
+
+#' Linear Regression
+#'
+#'
+#'
+#'
+#'
+#'
+#'
+linreg <- function(formula, data){
     # Creating X matrix and the dependet variable y
     X <- model.matrix(formula, data = data)
     y <- data[[all.vars(formula)[1]]]
 
-    # Regression coefficients
+    # Regression coefficientsS
     beta_hat <- (solve(t(X) %*% X)) %*% (t(X) %*% y)
 
     # Fitted val
@@ -22,13 +35,18 @@ linear_reg <- function(formula, data){
     sigma_hat2 <- (t(e_hat) %*% e_hat) / df
 
     # Variance of regression coefficients
-    var_beta_hat <- sigma_hat2 %*% (solve(t(X) %*% X))
+    var_beta_hat <- as.numeric(sigma_hat2) * (solve(t(X) %*% X))
+
 
     # t-values
-    t_beta <- beta_hat / sqrt(var_beta_hat)
+    t_beta <- beta_hat / sqrt(diag(var_beta_hat))
+    return(linreg_class$new(X = X, y = y, e_hat = e_hat))
   }
 
 
 
+data(iris)
 
+ok <- linreg(Sepal.Length ~ Sepal.Width, iris)
 
+print(dim(ok$X))
