@@ -1,5 +1,5 @@
 
-  linear_reg <- function(formula, data){
+linear_reg <- function(formula, data){
     # Creating X matrix and the dependet variable y
     X <- model.matrix(formula, data = data)
     y <- data[[all.vars(formula)[1]]]
@@ -30,10 +30,5 @@
 )
 
 
-linreg <- function(formula, data) {
-  model$new
-}
 
 
-data("iris")
-test <-model.matrix(iris$Species ~.,,data = iris)
