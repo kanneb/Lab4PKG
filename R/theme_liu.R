@@ -13,7 +13,7 @@
 #' ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
 #' geom_point(size = 2) +
 #' theme_liu() +
-#' labs(title = "Iris-mätningar", subtitle = "Exempel med LiU-tema")
+#' labs(title = "Iris", subtitle = "Example plot with liu theme")
 #'
 #' @export
 
