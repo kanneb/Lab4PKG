@@ -1,4 +1,18 @@
-library(ggplot2)
+#' LIU theme
+#'
+#' A ggplot2 theme that can be used in ggplot2 plots
+#'
+#'
+#'
+#' @import ggplot2
+#'
+#' @examples
+#' data(iris)
+#'
+#' ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
+#' geom_point(size = 2) +
+#' theme_liu() +
+#' labs(title = "Iris-mätningar", subtitle = "Exempel med LiU-tema")
 
 theme_liu <- function(...) {
   theme(
@@ -19,8 +33,3 @@ theme_liu <- function(...) {
   )
 }
 
-
-ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
-  geom_point(size = 2) +
-  theme_liu() +
-  labs(title = "Iris-mätningar", subtitle = "Exempel med LiU-tema", caption = "Källa: Papi Santana")
