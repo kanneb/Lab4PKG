@@ -27,7 +27,7 @@ linear_reg <- function(formula, data){
     # t-values
     t_beta <- beta_hat / sqrt(var_beta_hat)
   }
-)
+
 
 
 
