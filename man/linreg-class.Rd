@@ -16,5 +16,7 @@ Linear Regression object
 \item{\code{pred()}}{Returns the predicted Y values.}
 
 \item{\code{resid()}}{Returns the residuals as a vector.}
+
+\item{\code{summary()}}{Prints coefficients, standard errors, t-values, p-values, sigma and df.}
 }}
 
