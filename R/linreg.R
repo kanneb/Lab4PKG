@@ -1,7 +1,33 @@
 linreg_class <- setRefClass("linreg",
                             fields = list(X = "matrix", y = "numeric",
-                                          e_hat = "matrix")
+                                          formula = "formula", beta_hat = "matrix",
+                                          y_hat = "matrix", e_hat = "matrix"
+                                          ),
+
+                            methods = list(
+
+                              show = function(){
+                                "Print the coefficents and their names."
+                                coefficnet <- drop(.self$beta_hat)
+                                cat("Coefficents: \n")
+                                print(coefficnet)
+
+                              },
+                              plot = function(){
+
+                              },
+                              resid = function(){
+                                "Returns the residuals as a vector."
+                                drop(.self$e_hat)
+                              }
+
+
+
+
+
                             )
+              )
+
 
 
 #' Linear Regression
@@ -40,13 +66,35 @@ linreg <- function(formula, data){
 
     # t-values
     t_beta <- beta_hat / sqrt(diag(var_beta_hat))
-    return(linreg_class$new(X = X, y = y, e_hat = e_hat))
+    return(linreg_class$new(X = X, y = y, formula = formula,
+                            beta_hat = beta_hat,y_hat = y_hat, e_hat = e_hat))
   }
 
 
 
 data(iris)
 
-ok <- linreg(Sepal.Length ~ Sepal.Width, iris)
+data_reg <- linreg(Petal.Length ~ Species, iris)
 
-print(dim(ok$X))
+print(data_reg)
+
+#print((drop(data_reg$resid())))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
