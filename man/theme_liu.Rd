@@ -4,7 +4,7 @@
 \alias{theme_liu}
 \title{LIU theme}
 \usage{
-theme_liu(...)
+theme_liu()
 }
 \value{
 A \code{theme} object that can be added in a ggplot2 object with \code{+}

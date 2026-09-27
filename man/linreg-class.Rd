@@ -3,11 +3,15 @@
 \docType{class}
 \name{linreg-class}
 \alias{linreg-class}
-\alias{linreg_class}
+\alias{linreg}
 \title{Linear regression object}
 \description{
 Reference class that stores the results of a linear regression fitted
 with \code{linreg()}. Objects are created by \code{linreg()}, not directly.
+}
+\details{
+Fits a linear regression model with ordinary least squares and returns
+an object with methods for printing, plotting and summarising the fit.
 }
 \section{Fields}{
 
@@ -48,8 +52,17 @@ with \code{linreg()}. Objects are created by \code{linreg()}, not directly.
 
 \item{\code{pred()}}{Returns the predicted Y values.}
 
+\item{\code{print()}}{Print the coefficents and their names.}
+
 \item{\code{resid()}}{Returns the residuals as a vector.}
 
 \item{\code{summary()}}{Prints coefficients, standard errors, t-values, p-values, sigma and df.}
 }}
 
+\examples{
+mod <- linreg(Petal.Length ~ Species, data = iris)
+mod
+mod$summary()
+mod$coef()
+
+}

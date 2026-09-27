@@ -17,7 +17,7 @@
 #'
 #' @export
 
-theme_liu <- function(...) {
+theme_liu <- function() {
   theme(
     plot.background  = element_rect(fill = "black", color = NA),
     panel.background = element_rect(fill = "black", color = NA),

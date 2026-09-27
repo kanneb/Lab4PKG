@@ -3,6 +3,9 @@
 #' Reference class that stores the results of a linear regression fitted
 #' with \code{linreg()}. Objects are created by \code{linreg()}, not directly.
 #'
+#' Fits a linear regression model with ordinary least squares and returns
+#' an object with methods for printing, plotting and summarising the fit.
+#'
 #' @field X Design matrix.
 #' @field y Response variable.
 #' @field data The data used to fit the model.
@@ -16,8 +19,18 @@
 #' @field std_err Standard errors of the coefficients.
 #' @field t_beta t-values of the coefficients.
 #' @field p_value p-values of the coefficients.
+#'
+#' @examples
+#' mod <- linreg(Petal.Length ~ Species, data = iris)
+#' mod
+#' mod$summary()
+#' mod$coef()
+#'
 #' @importFrom ggplot2 ggplot aes geom_point labs stat_summary
-linreg_class <- setRefClass("linreg",
+#' @importFrom methods setRefClass new
+#' @export linreg
+#' @exportClass linreg
+linreg <- setRefClass("linreg",
                             fields = list(X = "matrix", y = "numeric", data = "data.frame",
                                           formula = "formula", beta_hat = "matrix",
                                           y_hat = "matrix", e_hat = "matrix",
@@ -25,15 +38,64 @@ linreg_class <- setRefClass("linreg",
                                           df = "numeric", std_err = "numeric", t_beta = "numeric", p_value = "numeric"
                                           ),
                             methods = list(
+                              initialize = function(formula, data){
 
-                              show = function(){
+                                stopifnot(
+                                  "formula must be a formula" = inherits(formula, "formula"),
+                                  "data must be a data.frame" = is.data.frame(data),
+                                  "all variables in formula must exist in data" = all(all.vars(formula) %in% names(data)),
+                                  is.numeric(data[[all.vars(formula)[1]]]),
+                                  !anyNA(data[all.vars(formula)])
+                                )
+
+                                data_name <<- deparse(substitute(data))
+                                formula <<- formula
+                                data <<- data
+
+                                # Creating X matrix and the dependet variable y
+                                X <<- model.matrix(formula, data = data)
+                                y <<- data[[all.vars(formula)[1]]]
+
+                                # Regression coefficientsS
+                                beta_hat <<- (solve(t(X) %*% X)) %*% (t(X) %*% y)
+
+                                # Fitted val
+                                y_hat <<- X %*% beta_hat
+
+                                # Residuals
+                                e_hat <<- y - y_hat
+
+                                # Degrees of freedom
+                                n <- nrow(X)
+                                p <- ncol(X)
+                                df <<- n - p
+
+                                # Residual variance
+                                sigma_hat2 <<- as.numeric((t(e_hat) %*% e_hat) / df)
+
+                                # Variance of regression coefficients
+                                var_beta_hat <- as.numeric(sigma_hat2) * (solve(t(X) %*% X))
+
+
+                                # t-values
+                                std_err <<- sqrt(diag(var_beta_hat))
+                                t_beta  <<- drop(beta_hat) / std_err
+
+                                p_value <<- 2 * pt(abs(t_beta), df, lower.tail = FALSE)
+                              },
+
+                              print = function(){
                                 "Print the coefficents and their names."
                                 coefficnet <- drop(.self$beta_hat)
                                 cat("Call:\n")
                                 cat("linreg(formula = ",deparse(formula),", data = ",.self$data_name,")\n\n",sep="")
                                 cat("Coefficents: \n")
-                                print(coefficnet)
+                                base::print(coefficnet)
+                              },
 
+                              show = function(){
+                                "Prints the object, same as print()."
+                                print()
                               },
 
                               plot = function(){
@@ -49,15 +111,16 @@ linreg_class <- setRefClass("linreg",
                                                 geom_point(shape = 1)+
                                                 stat_summary(fun = median, geom = "line", color = "red") +
                                                 labs(title = "Residuals vs Fitted",
-                                                       x = x_lable, y = "Residuals")
+                                                       x = x_lable, y = "Residuals")+
+                                                theme_liu()
 
                                 plot2 <- ggplot(data_combined, aes(x = y_hat, y = e_std)) +
                                                 geom_point(shape = 1)+
                                                 stat_summary(fun = median, geom = "line", color = "red") +
                                                 labs(title = "Scale-Location",
                                                      x = x_lable, y = expression(sqrt(abs("Standardized residuals"))))
-                                print(plot1)
-                                print(plot2)
+                                base::print(plot1)
+                                base::print(plot2)
 
                               },
 
@@ -82,76 +145,14 @@ linreg_class <- setRefClass("linreg",
                                              "Std.Error" = .self$std_err,
                                              "t value"    = .self$t_beta,
                                              "Pr(>|t|)"   = .self$p_value)
-                                print(tab)
+                                stars <- ifelse(.self$p_value < 0.001, "***",
+                                                ifelse(.self$p_value < 0.01, "**",
+                                                       ifelse(.self$p_value < 0.05, "*", "")))
+                                tab <- data.frame(tab, stars, check.names = FALSE)
+                                base::print(tab)
                                 cat("\nResidual standard error:", sqrt(.self$sigma_hat2),
                                     "on", .self$df, "degrees of freedom\n")
                               }
                             )
               )
-
-
-#' Linear regression
-#'
-#' Fits a linear regression model with ordinary least squares and returns
-#' an object with methods for printing, plotting and summarising the fit.
-#'
-#' @param formula A formula, for example \code{y ~ x}.
-#' @param data A data frame containing the variables in the formula.
-#'
-#' @return An object of class \code{linreg}.
-#'
-#' @examples
-#' mod <- linreg(Petal.Length ~ Species, data = iris)
-#' mod
-#' mod$summary()
-#' mod$coef()
-#' @export
-linreg <- function(formula, data){
-
-    stopifnot(
-      "formula must be a formula" = inherits(formula, "formula"),
-      "data must be a data.frame" = is.data.frame(data),
-      "all variables in formula must exist in data" = all(all.vars(formula) %in% names(data)),
-      is.numeric(data[[all.vars(formula)[1]]]),
-      !anyNA(data[all.vars(formula)])
-    )
-
-    data_name = deparse(substitute(data))
-
-    # Creating X matrix and the dependet variable y
-    X <- model.matrix(formula, data = data)
-    y <- data[[all.vars(formula)[1]]]
-
-    # Regression coefficientsS
-    beta_hat <- (solve(t(X) %*% X)) %*% (t(X) %*% y)
-
-    # Fitted val
-    y_hat <- X %*% beta_hat
-
-    # Residuals
-    e_hat <- y - y_hat
-
-    # Degrees of freedom
-    n <- nrow(X)
-    p <- ncol(X)
-    df <- n - p
-
-    # Residual variance
-    sigma_hat2 <- (t(e_hat) %*% e_hat) / df
-
-    # Variance of regression coefficients
-    var_beta_hat <- as.numeric(sigma_hat2) * (solve(t(X) %*% X))
-
-
-    # t-values
-    std_err <- sqrt(diag(var_beta_hat))
-    t_beta  <- drop(beta_hat) / std_err
-
-    p_value <- 2 * pt(abs(t_beta), df, lower.tail = FALSE)
-
-    return(linreg_class$new(X = X, y = y, data= data, formula = formula,
-                            beta_hat = beta_hat,y_hat = y_hat, e_hat = e_hat,
-                            data_name = data_name, sigma_hat2 = as.numeric(sigma_hat2),
-                            df = df, std_err = std_err, t_beta = t_beta, p_value = p_value))
-  }
 
