@@ -155,21 +155,3 @@ linreg <- function(formula, data){
                             df = df, std_err = std_err, t_beta = t_beta, p_value = p_value))
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
