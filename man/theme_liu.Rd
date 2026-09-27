@@ -7,7 +7,7 @@
 theme_liu(...)
 }
 \value{
-
+A \code{theme} object that can be added in a ggplot2 object with \code{+}
 }
 \description{
 A ggplot2 theme that can be used in ggplot2 plots

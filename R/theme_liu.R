@@ -2,7 +2,7 @@
 #'
 #' A ggplot2 theme that can be used in ggplot2 plots
 #'
-#' @return A \code{theme} object that can be added in a ggplot2 object with \{+}
+#' @return A \code{theme} object that can be added in a ggplot2 object with \code{+}
 #'
 #' @import ggplot2
 #'
