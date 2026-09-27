@@ -1,7 +1,22 @@
-#' Linear Regression object
+#' Linear regression object
 #'
+#' Reference class that stores the results of a linear regression fitted
+#' with \code{linreg()}. Objects are created by \code{linreg()}, not directly.
 #'
-#'@importFrom ggplot2 ggplot aes geom_point labs stat_summary
+#' @field X Design matrix.
+#' @field y Response variable.
+#' @field data The data used to fit the model.
+#' @field formula The model formula.
+#' @field data_name Name of the data set, used when printing.
+#' @field beta_hat Estimated coefficients.
+#' @field y_hat Fitted values.
+#' @field e_hat Residuals.
+#' @field sigma_hat2 Estimated residual variance.
+#' @field df Degrees of freedom.
+#' @field std_err Standard errors of the coefficients.
+#' @field t_beta t-values of the coefficients.
+#' @field p_value p-values of the coefficients.
+#' @importFrom ggplot2 ggplot aes geom_point labs stat_summary
 linreg_class <- setRefClass("linreg",
                             fields = list(X = "matrix", y = "numeric", data = "data.frame",
                                           formula = "formula", beta_hat = "matrix",
@@ -22,6 +37,7 @@ linreg_class <- setRefClass("linreg",
                               },
 
                               plot = function(){
+                                "Plots Residuals vs Fitted and Scale-Location using ggplot2."
                                 data_combined <- data.frame(
                                   y_hat = drop(.self$y_hat),
                                   e_hat = drop(.self$e_hat),
@@ -74,14 +90,22 @@ linreg_class <- setRefClass("linreg",
               )
 
 
-#' Linear Regression
+#' Linear regression
 #'
+#' Fits a linear regression model with ordinary least squares and returns
+#' an object with methods for printing, plotting and summarising the fit.
 #'
+#' @param formula A formula, for example \code{y ~ x}.
+#' @param data A data frame containing the variables in the formula.
 #'
+#' @return An object of class \code{linreg}.
 #'
-#'
-#'
-#'@export
+#' @examples
+#' mod <- linreg(Petal.Length ~ Species, data = iris)
+#' mod
+#' mod$summary()
+#' mod$coef()
+#' @export
 linreg <- function(formula, data){
     data_name = deparse(substitute(data))
     # Creating X matrix and the dependet variable y

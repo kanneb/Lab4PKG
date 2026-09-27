@@ -2,10 +2,25 @@
 % Please edit documentation in R/linreg.R
 \name{linreg}
 \alias{linreg}
-\title{Linear Regression}
+\title{Linear regression}
 \usage{
 linreg(formula, data)
 }
+\arguments{
+\item{formula}{A formula, for example \code{y ~ x}.}
+
+\item{data}{A data frame containing the variables in the formula.}
+}
+\value{
+An object of class \code{linreg}.
+}
 \description{
-Linear Regression
+Fits a linear regression model with ordinary least squares and returns
+an object with methods for printing, plotting and summarising the fit.
+}
+\examples{
+mod <- linreg(Petal.Length ~ Species, data = iris)
+mod
+mod$summary()
+mod$coef()
 }
