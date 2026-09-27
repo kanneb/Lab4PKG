@@ -107,7 +107,17 @@ linreg_class <- setRefClass("linreg",
 #' mod$coef()
 #' @export
 linreg <- function(formula, data){
+
+    stopifnot(
+      "formula must be a formula" = inherits(formula, "formula"),
+      "data must be a data.frame" = is.data.frame(data),
+      "all variables in formula must exist in data" = all(all.vars(formula) %in% names(data)),
+      is.numeric(data[[all.vars(formula)[1]]]),
+      !anyNA(data[all.vars(formula)])
+    )
+
     data_name = deparse(substitute(data))
+
     # Creating X matrix and the dependet variable y
     X <- model.matrix(formula, data = data)
     y <- data[[all.vars(formula)[1]]]
