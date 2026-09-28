@@ -20,7 +20,7 @@
 theme_liu <- function() {
   theme(
     plot.background  = element_rect(fill = "black", color = NA),
-    panel.background = element_rect(fill = "black", color = NA),
+    panel.background = element_rect(fill = "white", color = NA),
     plot.title    = element_text(color = "white", hjust = 0.5, size = 20),
     plot.subtitle = element_text(color = "white", hjust = 0.5, size = 10),
     axis.title.x  = element_text(color = "#00BFFF"),

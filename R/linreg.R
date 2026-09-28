@@ -118,7 +118,8 @@ linreg <- setRefClass("linreg",
                                                 geom_point(shape = 1)+
                                                 stat_summary(fun = median, geom = "line", color = "red") +
                                                 labs(title = "Scale-Location",
-                                                     x = x_lable, y = expression(sqrt(abs("Standardized residuals"))))
+                                                     x = x_lable, y = expression(sqrt(abs("Standardized residuals"))))+
+                                                theme_liu()
                                 base::print(plot1)
                                 base::print(plot2)
 

@@ -13,7 +13,12 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
+In this package, you are able to use a linear regression model using ordinary least squares.
 
+This vignette will go though how the package works, what is available and the possibilities 
+a user has.
+
+## Use case
 ```{r setup}
 library(Lab4PKG)
 data(iris)
