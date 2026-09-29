@@ -13,19 +13,86 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-In this package, you are able to use a linear regression model using ordinary least squares.
 
-This vignette will go though how the package works, what is available and the possibilities 
-a user has.
+This package lets you fit a linear regression model using ordinary least squares.
+You create the model with the function `linreg()`, and the result is an object
+with methods for printing, plotting and inspecting the fit.
 
-## Use case
+This vignette goes through how the package works, what is available and how to
+use it, with the `iris` dataset as an example.
+
+## Data
+
+`iris` is a built in dataset with measurements of 150 flowers from three species.
+In the examples we model petal length (`Petal.Length`) using species (`Species`).
+
 ```{r setup}
 library(Lab4PKG)
 data(iris)
-estimation <- linreg(Petal.Length ~ Species, iris)
-estimation
+head(iris)
 ```
+
+## Fitting a model
+
+`linreg()` takes a formula and a data frame.
+
+```{r}
+estimation <- linreg(Petal.Length ~ Species, data = iris)
+```
+
+## Methods
+
+### print()
+
+Prints the call and the estimated coefficients. Since the class also has a
+`show()` method, just typing `estimation` gives the same output.
+
+```{r}
+estimation$print()
+```
+
+### plot()
+
+Creates two plots with ggplot2. *Residuals vs Fitted* shows whether the
+residuals are spread evenly around zero, and *Scale-Location* shows whether
+the spread of the residuals changes with the fitted values. The red line
+connects the median at each fitted value.
+
 ```{r}
 estimation$plot()
 ```
 
+### resid()
+
+Returns the residuals, the difference between the observed and the fitted values.
+
+```{r}
+head(estimation$resid())
+```
+
+### pred()
+
+Returns the fitted values.
+
+```{r}
+head(estimation$pred())
+```
+
+### coef()
+
+Returns the estimated coefficients as a named vector.
+
+```{r}
+estimation$coef()
+```
+
+### summary()
+
+Prints a table with the estimated coefficients, their standard errors,
+t values and p values. Stars mark significance (`***` p < 0.001,
+`**` p < 0.01, `*` p < 0.05). Below the table it prints the residual
+standard error and the degrees of freedom.
+
+```{r}
+estimation$summary()
+```
