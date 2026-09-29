@@ -2,6 +2,8 @@
 #'
 #' A ggplot2 theme that can be used in ggplot2 plots
 #'
+#' @param ... Not currently used
+#'
 #' @return A \code{theme} object that can be added in a ggplot2 object with \{+}
 #'
 #' @import ggplot2
@@ -35,4 +37,5 @@ theme_liu <- function(...) {
     panel.grid.minor = element_line(color = "#00BFFF", linewidth = 0.1)
   )
 }
+
 
