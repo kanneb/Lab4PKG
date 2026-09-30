@@ -2,9 +2,7 @@
 #'
 #' A ggplot2 theme that can be used in ggplot2 plots
 #'
-#' @param ... Not currently used
-#'
-#' @return A \code{theme} object that can be added in a ggplot2 object with \{+}
+#' @return A \code{theme} object that can be added in a ggplot2 object with \code{+}
 #'
 #' @import ggplot2
 #'
@@ -19,7 +17,7 @@
 #'
 #' @export
 
-theme_liu <- function(...) {
+theme_liu <- function() {
   theme(
     plot.background  = element_rect(fill = "black", color = NA),
     panel.background = element_rect(fill = "black", color = NA),
