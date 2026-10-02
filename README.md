@@ -32,7 +32,7 @@ estimation$print()
 #> Call:
 #> linreg(formula = Petal.Length ~ Species, data = iris)
 #> 
-#> Coefficents: 
+#> Coefficients: 
 #>       (Intercept) Speciesversicolor  Speciesvirginica 
 #>             1.462             2.798             4.090
 ```

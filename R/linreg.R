@@ -86,11 +86,11 @@ linreg <- setRefClass("linreg",
 
                               print = function(){
                                 "Print the coefficients and their names."
-                                coefficnet <- drop(.self$beta_hat)
+                                coefficient <- drop(.self$beta_hat)
                                 cat("Call:\n")
                                 cat("linreg(formula = ",deparse(formula),", data = ",.self$data_name,")\n\n",sep="")
                                 cat("Coefficients: \n")
-                                base::print(coefficnet)
+                                base::print(coefficient)
                               },
 
                               show = function(){
