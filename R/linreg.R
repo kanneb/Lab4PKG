@@ -52,11 +52,11 @@ linreg <- setRefClass("linreg",
                                 formula <<- formula
                                 data <<- data
 
-                                # Creating X matrix and the dependet variable y
+                                # Creating X matrix and the dependent variable y
                                 X <<- model.matrix(formula, data = data)
                                 y <<- data[[all.vars(formula)[1]]]
 
-                                # Regression coefficientsS
+                                # Regression coefficients
                                 beta_hat <<- (solve(t(X) %*% X)) %*% (t(X) %*% y)
 
                                 # Fitted val
@@ -85,11 +85,11 @@ linreg <- setRefClass("linreg",
                               },
 
                               print = function(){
-                                "Print the coefficents and their names."
+                                "Print the coefficients and their names."
                                 coefficnet <- drop(.self$beta_hat)
                                 cat("Call:\n")
                                 cat("linreg(formula = ",deparse(formula),", data = ",.self$data_name,")\n\n",sep="")
-                                cat("Coefficents: \n")
+                                cat("Coefficients: \n")
                                 base::print(coefficnet)
                               },
 
@@ -105,20 +105,20 @@ linreg <- setRefClass("linreg",
                                   e_hat = drop(.self$e_hat),
                                   e_std = sqrt(abs(.self$e_hat/(sqrt(.self$sigma_hat2))))
                                 )
-                                x_lable = paste0("Fitted Values \nlm(",deparse(.self$formula),")")
+                                x_label = paste0("Fitted Values \nlm(",deparse(.self$formula),")")
 
                                 plot1 <- ggplot(data_combined, aes(x = y_hat, y = e_hat)) +
                                                 geom_point(shape = 1)+
                                                 stat_summary(fun = median, geom = "line", color = "red") +
                                                 labs(title = "Residuals vs Fitted",
-                                                       x = x_lable, y = "Residuals")+
+                                                       x = x_label, y = "Residuals")+
                                                 theme_liu()
 
                                 plot2 <- ggplot(data_combined, aes(x = y_hat, y = e_std)) +
                                                 geom_point(shape = 1)+
                                                 stat_summary(fun = median, geom = "line", color = "red") +
                                                 labs(title = "Scale-Location",
-                                                     x = x_lable, y = expression(sqrt(abs("Standardized residuals"))))+
+                                                     x = x_label, y = expression(sqrt(abs("Standardized residuals"))))+
                                                 theme_liu()
                                 base::print(plot1)
                                 base::print(plot2)
@@ -136,7 +136,7 @@ linreg <- setRefClass("linreg",
                               },
 
                               coef = function(){
-                                "Returns the the coefficients as a named vector."
+                                "Returns the coefficients as a named vector."
                                 drop(.self$beta_hat)
                               },
 

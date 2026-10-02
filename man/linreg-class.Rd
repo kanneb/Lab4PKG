@@ -46,13 +46,13 @@ an object with methods for printing, plotting and summarising the fit.
 \section{Methods}{
 
 \describe{
-\item{\code{coef()}}{Returns the the coefficients as a named vector.}
+\item{\code{coef()}}{Returns the coefficients as a named vector.}
 
 \item{\code{plot()}}{Plots Residuals vs Fitted and Scale-Location using ggplot2.}
 
 \item{\code{pred()}}{Returns the predicted Y values.}
 
-\item{\code{print()}}{Print the coefficents and their names.}
+\item{\code{print()}}{Print the coefficients and their names.}
 
 \item{\code{resid()}}{Returns the residuals as a vector.}
 

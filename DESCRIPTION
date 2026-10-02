@@ -14,11 +14,10 @@ Authors@R: c(
       role = c("aut", "cre")
     )
   )
-Description: Fits linear regression model using ordinary least squares.
+Description: Fits a linear regression model using ordinary least squares.
     Includes methods to print, plot and summarise the fit.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
 Imports: 
     ggplot2,
     methods
