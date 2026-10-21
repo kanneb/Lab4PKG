@@ -19,8 +19,10 @@ Description: Fits a linear regression model using ordinary least squares.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Imports: 
+    dplyr,
     ggplot2,
-    methods
+    methods,
+    nycflights13
 Config/roxygen2/version: 8.1.0
 Suggests: 
     knitr,
