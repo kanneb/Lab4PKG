@@ -2,8 +2,16 @@
 
 export(linreg)
 export(theme_liu)
+export(visualize_airport_delays)
 exportClasses(linreg)
 import(ggplot2)
+importFrom(dplyr,
+  filter,
+  group_by,
+  inner_join,
+  select,
+  summarise
+)
 importFrom(ggplot2,
   aes,
   geom_point,
