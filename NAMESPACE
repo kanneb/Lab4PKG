@@ -3,9 +3,17 @@
 export(linreg)
 export(ridgereg)
 export(theme_liu)
+export(visualize_airport_delays)
 exportClasses(linreg)
 exportClasses(ridgereg)
 import(ggplot2)
+importFrom(dplyr,
+  filter,
+  group_by,
+  inner_join,
+  select,
+  summarise
+)
 importFrom(ggplot2,
   aes,
   geom_point,
