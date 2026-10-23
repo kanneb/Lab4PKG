@@ -1,0 +1,76 @@
+---
+title: "Flight Delay Predictive Modeling"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Flight Delay Predictive Modeling}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Import packages
+```{r setup, message=FALSE}
+library(Lab4PKG)
+library(dplyr)
+library(rlang)
+```
+
+Data information
+```{r}
+cat("Flights dim:", nrow(nycflights13::flights),"rows and", ncol(nycflights13::flights),"columns.\n")
+cat("Weather dim:", nrow(nycflights13::weather),"rows and", ncol(nycflights13::weather),"columns.\n")
+```
+
+
+```{r}
+cat("Flights data: ",colnames(nycflights13::flights),"\n")
+cat("Weather data: ",colnames(nycflights13::weather),"\n")
+```
+
+Plan : Take time_hour,wind_speed, wind_dir and wind_gust, visib from weather data.
+  Take time_hour, arr_delay and match with origin and time
+
+
+Filter Weather data
+```{r}
+weather_filterd <- nycflights13::weather |> 
+  select("time_hour", "wind_speed", "wind_dir", "wind_gust", "visib", "origin") 
+weather_filterd
+  
+```
+
+Filter Flights data
+```{r}
+flights_filtered <- nycflights13::flights |> 
+  select("time_hour", "arr_delay", "origin") 
+flights_filtered
+
+```
+
+
+Join both data sets with the useful parts      
+```{r}
+flights_weather <- left_join(flights_filtered, weather_filterd, suffix = c("time_hour","origin")) |> 
+  relocate(origin, .before = time_hour)
+flights_weather
+```
+
+
+```{r}
+flights_weather |> 
+  filter(visib < 8)
+
+```
+
+
+
+
+
