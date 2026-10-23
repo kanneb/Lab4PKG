@@ -25,3 +25,4 @@ importFrom(methods,
   new,
   setRefClass
 )
+importFrom(rlang,.data)
