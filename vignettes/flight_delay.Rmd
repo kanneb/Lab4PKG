@@ -21,6 +21,7 @@ Import packages
 library(Lab4PKG)
 library(dplyr)
 library(rlang)
+library(tidyr)
 ```
 
 Data information
@@ -64,12 +65,32 @@ flights_weather
 ```
 
 
-```{r}
-flights_weather |> 
-  filter(visib < 8)
+A problem in the data is the wind_dir column which specifies wind direction in degrees.
+But if we think about it, wind_dir 10 and wind_dir 350 are prettey close to each other,
+but mathematically they are far away and the model would not see them as similar.
 
+To solve that issue the unit circle rules are used and split the wind_dir column into
+x and y variables in a coordinate system.
+
+And also totaly filter data so its ready for the model.
+
+```{r}
+delay_dataset <- flights_weather |> 
+  mutate(wind_x = cos(wind_dir * pi/180), wind_y = sin(wind_dir * pi/180), wind_dir = NULL) |> 
+  select(!c("origin", "time_hour","wind_gust")) |> #remove wind_gust from data because it has many NA 3/4 of data
+  drop_na()
+    
+delay_dataset
 ```
 
+
+
+```{r}
+formel <- formula(arr_delay ~ wind_speed +  visib + wind_x + wind_y + wind_speed:wind_x + wind_speed:wind_y)
+mod <- Lab4PKG::ridgereg$new(formel, data = delay_dataset, lambda = 10)
+mod$coef()
+
+```
 
 
 

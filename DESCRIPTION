@@ -26,9 +26,11 @@ Imports:
     rlang
 Config/roxygen2/version: 8.1.0
 Suggests: 
+    caret,
     knitr,
     MASS,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    tidyr
 Config/testthat/edition: 3
 VignetteBuilder: knitr
