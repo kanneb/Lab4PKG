@@ -38,7 +38,9 @@ ridgereg <- setRefClass("ridgereg",
       lambda = "numeric",
       beta_hat = "matrix",
       data_name = "character",
-      y_hat = "matrix"
+      y_hat = "matrix",
+      x_mean = "numeric",
+      x_sd = "numeric"
     ) ,
 
     methods = list(
@@ -60,8 +62,8 @@ ridgereg <- setRefClass("ridgereg",
 
         # x_norm
         X_norm <- X
-        x_mean <- colMeans(X[,-1, drop = FALSE])
-        x_sd <- apply(X[,-1, drop = FALSE], FUN = sd, MARGIN = 2)
+        x_mean <<- colMeans(X[,-1, drop = FALSE])
+        x_sd <<- apply(X[,-1, drop = FALSE], FUN = sd, MARGIN = 2)
         X_norm[,-1] <- scale(X[,-1, drop = FALSE], center = x_mean, scale = x_sd)
 
         # Regression coefficients
@@ -91,7 +93,7 @@ ridgereg <- setRefClass("ridgereg",
           "newdata has to be a data.frame" = is.data.frame(newdata)
         )
 
-        X_new <- model.matrix(frm, data = newdata)
+        X_new <- model.matrix(formula, data = newdata)
 
         X_new[,-1] <- scale(X_new[,-1], center = x_mean, scale = x_sd)
 

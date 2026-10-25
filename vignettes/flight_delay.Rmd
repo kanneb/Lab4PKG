@@ -22,6 +22,7 @@ library(Lab4PKG)
 library(dplyr)
 library(rlang)
 library(tidyr)
+library(caret)
 ```
 
 Data information
@@ -82,15 +83,66 @@ delay_dataset <- flights_weather |>
     
 delay_dataset
 ```
+```{r}
+#Split data into 5% test, 15% validation and 80% training data
+train_idx <- createDataPartition(delay_dataset$arr_delay, p = 0.8, list = FALSE)
+train_data <- delay_dataset[train_idx, ]
+rest_data <- delay_dataset[-train_idx, ]
 
-
+validation_idx <- createDataPartition(rest_data$arr_delay, p = 0.75, list = FALSE)
+validation_data <- rest_data[validation_idx, ]
+test_data <- rest_data[-validation_idx, ]
+```
 
 ```{r}
-formel <- formula(arr_delay ~ wind_speed +  visib + wind_x + wind_y + wind_speed:wind_x + wind_speed:wind_y)
-mod <- Lab4PKG::ridgereg$new(formel, data = delay_dataset, lambda = 10)
-mod$coef()
+#validate dthe split
+nrow(train_data) / nrow(delay_dataset)
+nrow(validation_data) / nrow(delay_dataset)
+nrow(test_data) / nrow(delay_dataset)
+```
+
+
+###Root mean squared error function (RMSE)
+```{r}
+rmse <- function(error) return(sqrt(mean(error^2)))
+```
+
+###Evalute different lambda values
+```{r}
+lambdas <- 10^seq(-2, 6, by = 1)
+total_error <- numeric(length(lambdas))
+form <- formula(arr_delay ~ wind_speed +  visib + wind_x + wind_y + wind_speed:wind_x + wind_speed:wind_y)
+
+for(i in seq_along(lambdas)){
+  
+  mod <- ridgereg$new(formula = form, data = train_data, lambda = lambdas[i])
+
+  pred <- mod$predict(newdata = validation_data)
+  error <- validation_data$arr_delay - pred
+  
+  total_error[i] <- rmse(error)
+}
+cat("Completed!")
+```
+
+###Find best lambda value
+```{r}
+min_error <- min(total_error)
+min_error_idx <- which(total_error==min(total_error))
+best_lambda <- lambdas[min_error_idx]
+cat("Min RMSE:",min_error,"idx:",min_error_idx,"Lambda:",best_lambda,"\n")
 
 ```
+
+###Test the test data with the best lambda value
+```{r}
+test_mod <- ridgereg$new(formula = form, data = train_data, lambda = best_lambda)
+test_pred <- test_mod$predict(test_data)
+test_error <- test_data$arr_delay - test_pred
+test_rmse <- rmse(test_error)
+test_rmse #minutes in error for the test data
+```
+
 
 
 
