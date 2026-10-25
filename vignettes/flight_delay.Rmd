@@ -12,79 +12,94 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = NA
 )
 ```
 
-Import packages
+In this vignette we try to predict the arrival delay of flights from New York
+using weather data at the departure airport. We use the `ridgereg()` function
+from this package and choose lambda with a validation set.
+
+## Packages
 ```{r setup, message=FALSE}
 library(Lab4PKG)
 library(dplyr)
-library(rlang)
 library(tidyr)
 library(caret)
 ```
 
-Data information
-```{r}
-cat("Flights dim:", nrow(nycflights13::flights),"rows and", ncol(nycflights13::flights),"columns.\n")
-cat("Weather dim:", nrow(nycflights13::weather),"rows and", ncol(nycflights13::weather),"columns.\n")
-```
+
+## Data
+
+Flights dataset has `r nrow(nycflights13::flights)` observations (rows) and `r ncol(nycflights13::flights)` features (columns).\
+Weather dataset has `r nrow(nycflights13::weather)` observations (rows) and `r ncol(nycflights13::weather)` features (columns).
 
 
 ```{r}
-cat("Flights data: ",colnames(nycflights13::flights),"\n")
-cat("Weather data: ",colnames(nycflights13::weather),"\n")
+cat("Columns in flights:", paste(colnames(nycflights13::flights), collapse = ", "), "\n\n")
+cat("Columns in weather:", paste(colnames(nycflights13::weather), collapse = ", "), "\n")
 ```
 
-Plan : Take time_hour,wind_speed, wind_dir and wind_gust, visib from weather data.
-  Take time_hour, arr_delay and match with origin and time
+Plan: from the weather data we take time_hour, wind_speed, wind_dir, wind_gust
+and visib. From the flights data we take time_hour, arr_delay and origin, and
+match the two on origin and time.
 
-
-Filter Weather data
+### Filter weather data
 ```{r}
-weather_filterd <- nycflights13::weather |> 
-  select("time_hour", "wind_speed", "wind_dir", "wind_gust", "visib", "origin") 
-weather_filterd
-  
+weather_filtered <- nycflights13::weather |> 
+  select("origin", "time_hour", "wind_speed", "wind_dir", "wind_gust", "visib")
+weather_filtered
 ```
 
-Filter Flights data
+
+### Filter flights data
 ```{r}
 flights_filtered <- nycflights13::flights |> 
-  select("time_hour", "arr_delay", "origin") 
+  select("origin", "time_hour", "arr_delay")
 flights_filtered
-
 ```
 
-
-Join both data sets with the useful parts      
+### Join both datasets
 ```{r}
-flights_weather <- left_join(flights_filtered, weather_filterd, suffix = c("time_hour","origin")) |> 
-  relocate(origin, .before = time_hour)
+flights_weather <- left_join(flights_filtered, weather_filtered, by = c("origin", "time_hour"))
 flights_weather
 ```
 
 
-A problem in the data is the wind_dir column which specifies wind direction in degrees.
-But if we think about it, wind_dir 10 and wind_dir 350 are prettey close to each other,
-but mathematically they are far away and the model would not see them as similar.
+## Cleaning the data
 
-To solve that issue the unit circle rules are used and split the wind_dir column into
-x and y variables in a coordinate system.
+```{r}
+knitr::kable(t(colSums(is.na(flights_weather))), caption = "Missing values per column")
+```
 
-And also totaly filter data so its ready for the model.
+wind_gust is removed since about 3/4 of its values are missing. The remaining
+rows with missing values are removed.
+
+The wind_dir column gives wind direction in degrees. 10° and 350° are pretty
+close to each other, but as numbers they are far apart, so the model would not
+see them as similar.
+
+To solve this we use the unit circle and split wind_dir into an x and a y value.
 
 ```{r}
 delay_dataset <- flights_weather |> 
-  mutate(wind_x = cos(wind_dir * pi/180), wind_y = sin(wind_dir * pi/180), wind_dir = NULL) |> 
-  select(!c("origin", "time_hour","wind_gust")) |> #remove wind_gust from data because it has many NA 3/4 of data
+  mutate(wind_x = cos(wind_dir * pi / 180),
+         wind_y = sin(wind_dir * pi / 180),
+         wind_dir = NULL) |> 
+  select(!c("origin", "time_hour", "wind_gust")) |> 
   drop_na()
-    
+
+cat("Rows before cleaning:", nrow(flights_weather), "\n")
+cat("Rows after cleaning:", nrow(delay_dataset), "\n")
 delay_dataset
 ```
+
+
+## Splitting the data
+The data is split into 80% training, 15% validation and 5% test data.
+
 ```{r}
-#Split data into 5% test, 15% validation and 80% training data
+set.seed(67)
 train_idx <- createDataPartition(delay_dataset$arr_delay, p = 0.8, list = FALSE)
 train_data <- delay_dataset[train_idx, ]
 rest_data <- delay_dataset[-train_idx, ]
@@ -95,55 +110,80 @@ test_data <- rest_data[-validation_idx, ]
 ```
 
 ```{r}
-#validate dthe split
-nrow(train_data) / nrow(delay_dataset)
-nrow(validation_data) / nrow(delay_dataset)
-nrow(test_data) / nrow(delay_dataset)
+cat("Training:  ", round(nrow(train_data) / nrow(delay_dataset), 3), "\n")
+cat("Validation:", round(nrow(validation_data) / nrow(delay_dataset), 3), "\n")
+cat("Test:      ", round(nrow(test_data) / nrow(delay_dataset), 3), "\n")
 ```
 
 
-###Root mean squared error function (RMSE)
+## Model
+
+We add interactions between wind speed and the two wind direction values
+(wind_x and wind_y). The idea is that wind direction should not matter much
+when it is calm, but when the wind is strong, the direction can make a big
+difference, for example if it blows straight against the runway or from the
+side. In other words, the effect of the direction depends on the speed.
+
+Multiplying the speed with wind_x and wind_y gives the wind's strength in the
+east-west and north-south direction.
+
+### Root mean squared error (RMSE)
 ```{r}
 rmse <- function(error) return(sqrt(mean(error^2)))
 ```
 
-###Evalute different lambda values
+
+### Evaluate different lambda values
+Each lambda is trained on the training data and evaluated on the validation data.
+
 ```{r}
 lambdas <- 10^seq(-2, 6, by = 1)
 total_error <- numeric(length(lambdas))
-form <- formula(arr_delay ~ wind_speed +  visib + wind_x + wind_y + wind_speed:wind_x + wind_speed:wind_y)
+form <- formula(arr_delay ~ wind_speed + visib + wind_x + wind_y + wind_speed:wind_x + wind_speed:wind_y)
 
-for(i in seq_along(lambdas)){
-  
+for (i in seq_along(lambdas)) {
   mod <- ridgereg$new(formula = form, data = train_data, lambda = lambdas[i])
-
   pred <- mod$predict(newdata = validation_data)
   error <- validation_data$arr_delay - pred
-  
   total_error[i] <- rmse(error)
 }
-cat("Completed!")
+
+knitr::kable(data.frame(lambda = lambdas, rmse = total_error), 
+             col.names =c("Lambda","Root Mean Squared Error"),
+             digits = 3)
 ```
 
-###Find best lambda value
+
+### Find best lambda value
 ```{r}
-min_error <- min(total_error)
-min_error_idx <- which(total_error==min(total_error))
+min_error_idx <- which.min(total_error)
 best_lambda <- lambdas[min_error_idx]
-cat("Min RMSE:",min_error,"idx:",min_error_idx,"Lambda:",best_lambda,"\n")
-
+cat("Best lambda:", best_lambda, "\n")
+cat("Validation RMSE:", round(total_error[min_error_idx], 2), "minutes\n")
 ```
 
-###Test the test data with the best lambda value
+
+## Test
+The model with the best lambda is evaluated once on the test data.
+
 ```{r}
 test_mod <- ridgereg$new(formula = form, data = train_data, lambda = best_lambda)
 test_pred <- test_mod$predict(test_data)
 test_error <- test_data$arr_delay - test_pred
 test_rmse <- rmse(test_error)
-test_rmse #minutes in error for the test data
+cat("Test RMSE:", round(test_rmse, 2), "minutes\n")
 ```
 
 
+## Conclusion
+The best lambda on the validation data was `r best_lambda`, and the model got
+a test RMSE of `r round(test_rmse, 2)` minutes.
 
+The choice of lambda had almost no effect. The validation RMSE barely changed
+between the different values. A likely reason is that we have a lot of data and only a few features, 
+so the model has little room to overfit and ridge has little to correct.
 
-
+The error is large, which shows that the weather variables only explain a small
+part of the delays. One reason is that the weather data only describes the
+conditions at the departure airport. Weather at the destination, and other
+causes such as air traffic or technical problems, are not included.
