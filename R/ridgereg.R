@@ -93,11 +93,11 @@ ridgereg <- setRefClass("ridgereg",
           "newdata has to be a data.frame" = is.data.frame(newdata)
         )
 
-        X_new <- model.matrix(formula, data = newdata)
+        X_new <- model.matrix(delete.response(terms(formula, data = data)), data = newdata)
 
         X_new[,-1] <- scale(X_new[,-1], center = x_mean, scale = x_sd)
 
-        y_hat_new <- X_new %*% beta_hat
+        y_hat_new <- as.vector(X_new %*% beta_hat)
 
         y_hat_new
       } ,

@@ -27,8 +27,10 @@ Imports:
 Config/roxygen2/version: 8.1.0
 Suggests: 
     caret,
+    kableExtra,
     knitr,
     MASS,
+    mlbench,
     rmarkdown,
     testthat (>= 3.0.0),
     tidyr

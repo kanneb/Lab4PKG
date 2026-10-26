@@ -1,0 +1,182 @@
+---
+title: "ridgereg"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ridgereg}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(Lab4PKG)
+library(dplyr)
+library(caret)
+library(mlbench)
+library(knitr)
+library(kableExtra)
+```
+
+
+# 1
+
+```{r}
+data("BostonHousing")
+boston <- BostonHousing
+
+set.seed(35169)
+
+id <- createDataPartition(boston$medv, p = 0.8, list = FALSE)
+bos.train <- boston[id,]
+bos.test <- boston[-id,]
+
+sum <- data.frame("Observations" = c(nrow(bos.train), nrow(bos.test)),
+                  "Percentage" = c(round(nrow(bos.train) / nrow(boston),1), 
+                                   round(nrow(bos.test) / nrow(boston),1))) %>% 
+  `rownames<-`(c("Train", "Test"))
+
+sum %>% kable(caption = "Distrubution of Train/Test dataset") %>% 
+  kable_styling("striped")
+``` 
+
+Divided the BostonHousing data into a training and a test dataset. The distrubtion between them is 80\% of the data is divided into training dataset and the 20\% is divided into the test dataset.
+
+# 2
+
+```{r}
+set.seed(35169)
+lm.mod <- train(medv ~ ., data = bos.train, method = "lm")
+fwd.mod <- train(medv ~ ., data = bos.train, method = "leapForward", tuneGrid = data.frame(nvmax = 1:13)) 
+summary(lm.mod)
+```
+
+Summary of the linear regression model where the median value of owner-occupied homes in each area ($1000). Looking at the p-value for each variable only two variable are not significant on respondent variable, which is age and indus. 
+
+```{r}
+summary(fwd.mod$finalModel)
+```
+
+The dataset contains 13 covariates, and the forward selection considers models with 1 to 13 covariates. For each model size, the summary shows which covariates are included (marked with *). The algorithm starts with lstat, since it alone explains medv best. In each following step, it adds the covariate that, given the variables already in the model, improves the fit the most, which is why rm is added second. The best model size is coosen by cross-validation, which selected a model with `r fwd.mod$bestTune$nvmax` covariates.
+
+# 3
+
+```{r}
+set.seed(35169)
+
+eval.lm <- postResample(predict(lm.mod,  bos.train), bos.train$medv)
+eval.fwd <- postResample(predict(fwd.mod, bos.train), bos.train$medv)
+
+eval <- data.frame("RMSE" = c(eval.lm[[1]], eval.fwd[[1]]),
+                   "R-squared" = c(eval.lm[[2]], eval.fwd[[2]]),
+                   "MAE" = c(eval.lm[[3]], eval.fwd[[3]])) %>% 
+  `row.names<-`(c("Linear", "Forward selection"))
+
+eval %>% kable(caption = "Evalutation of models") %>% 
+  kable_styling("striped")
+```
+
+Both models has almost the same performance metrics, it only differs some small decimals but it is almost identical. So both models perform almost the same on the training dataset. The forward selection model is only marginally worse, since it excludes covariates that contribute very little to the fit.
+
+# 4
+
+```{r}
+set.seed(35169)
+
+caret.list <- list(
+  library = NULL,
+  type = "Regression",
+  parameters = data.frame(parameter = "lambda",
+                          type = "numeric",
+                          label = "lambda"),
+  grid = function(x, y, len = NULL, search = "grid") {
+    data.frame(lambda = seq(0, 50, length.out = len))
+  },
+  fit = function(x, y, wts, param, lev, last, weights, classProbs, ...) {
+    df <- as.data.frame(x)
+    df$.outcome <- y
+    ridgereg$new(formula = .outcome ~ ., data = df, lambda = param$lambda)
+  },
+  predict = function(modelFit, newdata, preProc = NULL, submodels = NULL) {
+    as.vector(modelFit$predict(as.data.frame(newdata)))
+  },
+  prob = NULL,
+  sort = function(x) {
+    x[order(-x$lambda), ]
+  },
+  loop = NULL
+)
+
+ridge.mod <- train(medv ~ ., 
+                   data = bos.train, 
+                   method = caret.list, 
+                   tuneGrid = data.frame(lambda = c(0,1,5,10,20,30,40,50)))
+ridge.mod$results[,1:4] %>% kable(caption = "Metrics on different values of lambda") %>% 
+  kable_styling("striped")
+```
+
+Using different lambda values for ridge regression function on the training dataset. Lambda value 5 has the lowest RMSE value. Lambda value 20 has the lowest MAE value. R-squared has almost identical values for all chosen lambda values.
+
+# 5
+
+```{r}
+set.seed(35169)
+
+ctrl <- trainControl(method = "cv", number = 10)
+
+ridge.mod.2 <- train(medv ~ ., 
+                     data = bos.train, 
+                     method = caret.list,
+                     trControl = ctrl,
+                     tuneGrid = data.frame(lambda = seq(0,50, by = 0.5)))
+ggplot(ridge.mod.2$results, aes(y = RMSE, x = lambda)) + geom_line()
+```
+
+By fitting a ridge regression model with a different lambda value every run. Sequence of lambda values is from 0 to 50 by 0.5. The plot shows the RMSE value for every lambda value.
+
+
+```{r}
+ridge.mod.2$bestTune$lambda %>% as.data.frame() %>% 
+  `colnames<-`("lambda") %>% kable(caption = "Best lambda value") %>% 
+  kable_styling("striped")
+```
+
+The best lambda value with using 10-cross-validation is lambda `ridge.mod.2$bestTune$lambda`.
+
+
+
+```{r}
+set.seed(35169)
+
+eval.lm.test <- postResample(predict(lm.mod, bos.test), bos.test$medv)
+eval.fwd.test <- postResample(predict(fwd.mod, bos.test), bos.test$medv)
+eval.ridge.test <- postResample(predict(ridge.mod.2, bos.test), bos.test$medv)
+
+eval.test <- data.frame("RMSE" = c(eval.lm.test[[1]], eval.fwd.test[[1]], eval.ridge.test[[1]]),
+                        "R-squared" = c(eval.lm[[2]], eval.fwd[[2]], eval.ridge.test[[2]]),
+                        "MAE" = c(eval.lm[[3]], eval.fwd[[3]], eval.ridge.test[[1]])) %>% 
+  `row.names<-`(c("Linear", "Forward selection", "Ridge"))
+eval.test %>% kable(caption = "Evalutation of models") %>% 
+  kable_styling("striped")
+  
+```
+
+Table shows performance metrics on three different methods. The best performing model on RMSE is normal linear regression. The linear model is also best performing on MAE which means the simplest model has the least error in predicting on test data. Ridge regresseion model has the highest R-squared which means that model is best at describes the variation in the dependet variable. So the best model on test data is not the forward selection method but either Linear regression or Ridge regression. It depends on which metric is more important but we would suggest that Linear regression is better due to it is less complex to use and evaluate.
+
+
+
+
+
+
+
+
+
+
+
+
+
