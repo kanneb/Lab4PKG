@@ -33,6 +33,10 @@ It adds a penalty term that shrinks the coefficients of the object.
 \item{\code{beta_hat}}{Estimated coefficients.}
 
 \item{\code{y_hat}}{Fitted values.}
+
+\item{\code{x_mean}}{Variable means}
+
+\item{\code{x_sd}}{Variable standard devations}
 }}
 
 \section{Methods}{

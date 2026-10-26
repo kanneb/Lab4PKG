@@ -15,6 +15,8 @@
 #' @field data_name Name of the data set, used when printing.
 #' @field beta_hat Estimated coefficients.
 #' @field y_hat Fitted values.
+#' @field x_mean Variable means
+#' @field x_sd Variable standard devations
 #'
 #' @examples
 #' frm <- formula(Petal.Length~Sepal.Width+Sepal.Length)
