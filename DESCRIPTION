@@ -29,6 +29,7 @@ Suggests:
     caret,
     kableExtra,
     knitr,
+    leaps,
     MASS,
     mlbench,
     rmarkdown,
