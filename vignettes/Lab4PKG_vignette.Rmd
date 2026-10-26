@@ -1,8 +1,8 @@
 ---
-title: "linreg"
+title: "Linear Regression with linreg"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{linreg}
+  %\VignetteIndexEntry{Linear Regression with linreg}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

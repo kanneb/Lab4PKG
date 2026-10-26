@@ -58,9 +58,9 @@ head(ridge$predict())
 
 The package has three vignettes:
 
-- **Lab4PKG_vignette**: explains every method of `linreg()` with examples.
-- **ridgereg**: shows how to use `ridgereg()`.
-- **flight_delay**: predicts flight delays from weather data with `ridgereg()`.
+- **Linear Regression with linreg**: explains every method of `linreg()` with examples.
+- **Ridge Regression with ridgereg**: shows how to use `ridgereg()`.
+- **Flight Delay Predictive Modeling**: predicts flight delays from weather data with `ridgereg()`.
 
 Open them with:
 

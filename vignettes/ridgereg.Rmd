@@ -1,8 +1,8 @@
 ---
-title: "ridgereg"
+title: "Ridge Regression with ridgereg"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{ridgereg}
+  %\VignetteIndexEntry{Ridge Regression with ridgereg}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
